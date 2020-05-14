@@ -27,5 +27,4 @@ mongoose.connection.on('error', (err) => {
     console.log("connected" + err);
 })
 
-
-app.listen(process.PORT || 3005)
+app.listen(process.env.PORT || 3005)
