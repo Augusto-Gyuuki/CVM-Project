@@ -317,7 +317,7 @@ router.post('/data', upload.single('CNPJ') ,async(req, res) => {
                         
                         await workbook.xlsx.writeFile(path.join(__dirname, '..', '..', 'downloads',`${filename}.xlsx`))
                         
-                        res.send(`http://localhost:3005/files/${filename}.xlsx`)
+                        res.send(`https://cvm-project.herokuapp.com/files/${filename}.xlsx`)
                         
                         setTimeout(() => {
                             fs.unlink(filePath, (err) => {
