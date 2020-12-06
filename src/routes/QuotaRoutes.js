@@ -33,7 +33,9 @@ router.get('/quotas',async(req, res) => {
             return result
         })
     const { link } = response;
+    
     const downloadData = await axios.get(`${link}`)
+    
     const results = Papa.parse(downloadData.data, {
         header: true
     });
@@ -46,10 +48,17 @@ router.get('/quotas',async(req, res) => {
     })
     let uniqueDates = [...new Set(allDates)]
     uniqueDates.pop()
+    let highDate = uniqueDates[uniqueDates.length - 1]
+    uniqueDates.map((date) => {
+        if(date > highDate){
+            highDate = date
+        }
+    })
+    
     
     const data = []
     info.map((item) => {
-        if(item.DT_COMPTC == uniqueDates[uniqueDates.length - 1]){
+        if(item.DT_COMPTC == highDate){
             data.push(item)
         }
     })  
@@ -60,12 +69,13 @@ router.get('/quotas',async(req, res) => {
         delete item.RESG_DIA
         delete item.NR_COTST
     })
+    
+    
     data.map(async(cota) => {
         const { CNPJ_FUNDO, DT_COMPTC, VL_QUOTA } = cota
         
         const newQuota = new Quota({ CNPJ_FUNDO, DT_COMPTC, VL_QUOTA })
         await newQuota.save()
-
     })
 })
 router.post('/data', upload.single('CNPJ') ,async(req, res) => {
@@ -375,6 +385,7 @@ router.post('/date',async(req, res) => {
     })
     count = (count - 1 ) * 100
     cdiRent.rentMes = count.toFixed(2) + '%'
+    console.log(cdiMes);
     
     const cdi = await CDI.find({ name: 'cdi' })
     let anoAtual = lastMonth[0] + '-0' +(lastMonth[1] - (lastMonth[1] - 1))
@@ -428,6 +439,14 @@ router.post('/date',async(req, res) => {
     }
     return res.json(quota)
 })
+router.delete('/delete', async(req, res) => {
+    const { DT_COMPTC } = req.body
 
+    const cdi = await Quota.find({DT_COMPTC})
+    cdi.map(async(item)  => {
+        await Quota.findByIdAndDelete(item._id)
+    })    
+    return res.json(cdi)
+})
 module.exports = router
 
